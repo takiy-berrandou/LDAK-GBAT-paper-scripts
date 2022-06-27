@@ -1,0 +1,31 @@
+# Using 10 trits from UKBB (n= 50000) imputed data
+
+# example for height
+
+# Single-SNP analysis
+################################################################################################################################################################################################
+    #!/bin/bash
+    #SBATCH --partition normal
+    #SBATCH --account snpher
+    #SBATCH --mem-per-cpu 24G
+    #SBATCH -c 1
+    #SBATCH -t 1-6:0:0
+    #SBATCH --constraint "s04|s05"
+    #SBATCH -a 1-23
+    j=$SLURM_ARRAY_TASK_ID
+    chr=$j
+    if (($j==23));then chr=X;fi
+    # creating variables
+    result_folder=/faststorage/project/dsmwpred/takiy/analysis6_ukbb_association_imputed_data/4_results/plink2_glm/height_50k.train # result folder name 
+    result_out=height_ukbb_50k_train_imp_plink2_glm_chr$chr # prefix name for plink outputs
+    pfile_input=/faststorage/project/snpher/biobank/geno_plink/chr$chr # genotyping data
+    snp_list_extract_input="/faststorage/project/dsmwpred/takiy/analysis6_ukbb_association_imputed_data/1_data/list_snps_qc_maf_Rsq_chr"$chr"_v3.txt" # list of SNPs remained after QC (MAF>0.01 and Rsq >= 0.8)
+    pheno_input=/faststorage/project/dsmwpred/takiy/analysis3_gbat_vs_magma/1_data/ukbb_data_sample/height_50k.train # phenotype of 50k individuals sampled from UKBB population 
+    mkdir --p $result_folder
+    cd $result_folder
+
+    #performing single-SNP analysis
+    plink2_202103 --pfile $pfile_input --pheno $pheno_input --require-pheno --extract $snp_list_extract_input --glm sex omit-ref allow-no-covars hide-covar cols=chrom,pos,ref,alt1,a1count,totallele,a1freq,a1countcc,a1freqcc,firth,test,nobs,beta,se,ci,tz,p,err --out $result_out
+    # testing each SNP for Hardy Weinberg Equilibrium 
+    plink2_202103 --pfile $pfile_input --pheno $pheno_input --require-pheno --extract $snp_list_extract_input --hardy --out "$result_out"_hardy
+################################################################################################################################################################################################
