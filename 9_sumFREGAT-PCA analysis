@@ -1,0 +1,46 @@
+# sumFREGAT-PCA
+################################################################################################################################################################################################
+    #!/bin/bash
+    #SBATCH --partition normal
+    #SBATCH --account snpher
+    #SBATCH --mem-per-cpu 24G
+    #SBATCH -c 1
+    #SBATCH -t 0-24:00:00
+    # creating variables
+    eval "$(conda shell.bash hook)"
+    conda activate r4
+
+    Rscript -<<EOF
+    options(echo =TRUE)
+    library(data.table)
+    library(rio)
+    library(sumFREGAT)
+    sample_size ="50k"
+    n_sample_size =50000
+    ref ="10kukbbref"
+    res_path ="/faststorage/project/dsmwpred/takiy/analysis10_paper_results_item/4_results/gene_based_sumstats_10kukbbref_data/PCA/"
+    score_file_path =paste0(res_path,"score_files_imp/")
+    system(paste0("mkdir -p ",score_file_path))
+    ref_path ="/faststorage/project/dsmwpred/takiy/DATA/UKBB/refukbb_10k_imp_common_snps_AF.RData"
+    cor_path ="/faststorage/project/dsmwpred/takiy/DATA/snp_snp_cor_genes/ukbb_10k_imp_refpanel3_common_snps/"
+    path_annot_gene_file ="/faststorage/project/dsmwpred/takiy/DATA/NCBI37.3/NCBI37.3_hg19_gene_sumfregat_imp_common_snps.refFlat"
+    gene_to_analyse ="all"
+    sumstat_path =paste0("/faststorage/project/dsmwpred/takiy/analysis6_ukbb_association_imputed_data/4_results/plink2_glm_50k/","hyper","_50k.train/","hyper","_ukbb_train_imp_50k_sumfregat_sumstat_posid.tab")
+    print(sumstat_path)
+    sumstat =fread(sumstat_path)
+    scorefile_prefix =paste0(score_file_path,"hyper","_",sample_size)
+    print(Sys.time())
+    list_snps_posid_to_analyse_common_ukbb_imp_and_refpanels =fread("/faststorage/project/dsmwpred/takiy/DATA/list_snps_posid_to_analyse_common_ukbb_imp_and_refpanels.txt",header=F)[,V1]
+    prep_score_file =prep.score.files(sumstat[ID%in%list_snps_posid_to_analyse_common_ukbb_imp_and_refpanels,], reference  = ref_path,output.file.prefix =scorefile_prefix)
+    print(Sys.time())
+    score_file =paste0(scorefile_prefix,".vcf.gz")
+    res_file =paste0(res_path,"ukbb_","hyper","_",sample_size,"_sumstats_imp_",ref,"_pca_genebased.tab")
+    res_file_out =paste0(res_path,"ukbb_","hyper","_",sample_size,"_sumstats_imp_",ref,"_pca_genebased.out")
+    print(Sys.time())
+    pca_res =PCA(score.file =score_file, gene.file =path_annot_gene_file, genes  = gene_to_analyse, cor.path  =cor_path ,
+    anno.type  = "", n =n_sample_size,beta.par  = c(1, 1), weights.function  = NULL,user.weights  = FALSE, reference.matrix  = TRUE, fun  = "LH",
+    var.fraction  = 0.85, write.file  = res_file_out, quiet  = TRUE)
+    print(Sys.time())
+    fwrite(pca_res,res_file,col.names =T,sep ="\t",quote =F,na ="NA")
+    EOF
+################################################################################################################################################################################################
