@@ -1,0 +1,77 @@
+# Calculating SNP-SNP corelation matrix for each gene (to be used with sumFREGAT)
+################################################################################################################################################################################################
+    #!/bin/bash
+    #SBATCH --account snpher
+    #SBATCH --mem-per-cpu 8G
+    #SBATCH -c 10
+    #SBATCH -t 0-6:0:0
+    eval "$(conda shell.bash hook)"
+    conda activate r4
+    
+    Rscript -<<EOF
+    options(echo =TRUE)
+    # creating ref tab for sumFREGAT
+    #system("plink2_202103 --bfile /faststorage/project/dsmwpred/takiy/DATA/1000g_eur/g1000_nonFin_eur_imp_chr_1_22_posid_common_snps --freq cols=chrom,pos,ref,alt,reffreq,alt1freq,nobs --out /faststorage/project/dsmwpred/takiy/DATA/1000g_eur/g1000_nonFin_eur_imp_chr_1_22_posid_common_snps_freq")
+    #freq =fread("/faststorage/project/dsmwpred/takiy/DATA/1000g_eur/g1000_nonFin_eur_imp_chr_1_22_posid_common_snps_freq.afreq")
+    #ref1KG =freq[,.(CHROM =get("#CHROM"),POS,ID,REF,ALT,AF =ALT1_FREQ)]
+    #save(ref1KG,file ="/faststorage/project/dsmwpred/takiy/DATA/1000g_eur/ref1KG_404_nonfin_EUR_imp_common_snps_AF.RData")
+    # pre-calculating SNP-SNP cor matrix for genes based on ref panles 1000G and ukBB
+    parallel::detectCores()
+    getDTthreads()
+    gene_snp_snp_cor_fun =function(gene_refFlat,geno,bim,path =getwd(),n_cores =getDTthreads(),save.U =TRUE){
+    	.U_fun =function(geno,bim,x,path){
+    		list_snps =bim[CHROM%in%as.numeric(x)[2]&POS%in%as.numeric(x)[3]:as.numeric(x)[4],Predictor]
+    		mat_geno =data.table(geno[,list_snps])
+    		if(ncol(mat_geno) %in% 0){
+    			V =cor(mat_geno)
+    			U =V[!(apply(V,2,function(x)sum(is.na(x)))%in%(ncol(V)-1)),!(apply(V,2,function(x)sum(is.na(x)))%in%(ncol(V)-1))]
+    			#print(x)
+    			#print(dim(mat_geno)[2])
+    			#print(dim(V))
+    			#print(dim(U))
+    			if(save.U&sum(dim(U))>0){save(U,file =paste0(path,x[1],".RData"))}
+    			return(list(GENE =x,n_snp_gene =dim(mat_geno)[2],dim.V =dim(V),dim.U =dim(U)))
+    		}
+    		if(!ncol(mat_geno) %in%c(0,1)){
+    			V =cor(mat_geno,use="complete.obs",method="spearman")
+    			U =V[!(apply(V,2,function(x)sum(is.na(x)))%in%(ncol(V)-1)),!(apply(V,2,function(x)sum(is.na(x)))%in%(ncol(V)-1))]
+    			#print(x)
+    			#print(dim(mat_geno)[2])
+    			#print(dim(V))
+    			#print(dim(U))
+    			if(save.U&sum(dim(U))>0){save(U,file =paste0(path,x[1],".RData"))}
+    			return(list(GENE =x,n_snp_gene =dim(mat_geno)[2],dim.V =dim(V),dim.U =dim(U)))
+    		}
+    			if(ncol(mat_geno) ==1){
+    			#print(x)
+    			#print(dim(mat_geno)[2])
+    			U = V = matrix(1)
+    			#print(dim(V))
+    			#print(dim(U))
+    			rownames(U) =colnames(U) =list_snps
+    			if(save.U&sum(dim(U))>0){save(U,file =paste0(path,x[1],".RData"))}
+    			return(list(GENE =x,n_snp_gene =1,dim.V =dim(V),dim.U =dim(U)))
+    		}
+    	}
+    	parallel::mclapply(data.table(t(gene_refFlat)),function(y){.U_fun(geno,bim,x =y,path)},mc.cores =n_cores,mc.preschedule =T)
+    	#lapply(data.table(t(gene_refFlat)),function(y){.U_fun(geno,bim,x =y,path)})
+    }
+
+
+
+    bedFile1<- paste0("/faststorage/project/dsmwpred/takiy/DATA/1000g_eur/g1000_nonFin_eur_imp_chr_1_22_posid_common_snps.bed")
+    bim1 =fread("/faststorage/project/dsmwpred/takiy/DATA/1000g_eur/g1000_nonFin_eur_imp_chr_1_22_posid_common_snps.bim")
+    path1 =paste0("/faststorage/project/dsmwpred/takiy/DATA/snp_snp_cor_genes/1kg_nonfin_eur_imp_common_snps/") 
+    gene_refFlat =fread("/faststorage/project/dsmwpred/takiy/DATA/NCBI37.3/NCBI37.3.gene_v2.loc")
+    setnames(gene_refFlat,c("V1","V2","V3","V4","V5"),c("GENE","CHROM","START","STOP","STRAND"))
+    gene_refFlat[,index:=1:(.N)]
+    library(BEDMatrix)
+    geno1 <- BEDMatrix(bedFile1,simple_names  = T)
+    setnames(bim1,c("V1","V2","V3","V4","V5","V6"),c("CHROM","Predictor","cM","POS","A1","A2"))
+    system(paste0("mkdir -p ", path1))
+    A =gene_snp_snp_cor_fun(gene_refFlat =gene_refFlat,geno =geno1,bim =bim1,path =path1,n_cores =getDTthreads(),save.U =T)
+    print(A)
+    EOF
+
+
+################################################################################################################################################################################################
