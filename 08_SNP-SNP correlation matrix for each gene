@@ -11,10 +11,10 @@
     Rscript -<<EOF
     options(echo =TRUE)
     # creating ref tab for sumFREGAT
-    #system("plink2_202103 --bfile /faststorage/project/dsmwpred/takiy/DATA/1000g_eur/g1000_nonFin_eur_imp_chr_1_22_posid_common_snps --freq cols=chrom,pos,ref,alt,reffreq,alt1freq,nobs --out /faststorage/project/dsmwpred/takiy/DATA/1000g_eur/g1000_nonFin_eur_imp_chr_1_22_posid_common_snps_freq")
-    #freq =fread("/faststorage/project/dsmwpred/takiy/DATA/1000g_eur/g1000_nonFin_eur_imp_chr_1_22_posid_common_snps_freq.afreq")
-    #ref1KG =freq[,.(CHROM =get("#CHROM"),POS,ID,REF,ALT,AF =ALT1_FREQ)]
-    #save(ref1KG,file ="/faststorage/project/dsmwpred/takiy/DATA/1000g_eur/ref1KG_404_nonfin_EUR_imp_common_snps_AF.RData")
+    system("plink2_202103 --bfile /bfile_directory_path/g1000_nonFin_eur_imp_chr_1_22_posid_common_snps --freq cols=chrom,pos,ref,alt,reffreq,alt1freq,nobs --out /bfile_directory_path//g1000_nonFin_eur_imp_chr_1_22_posid_common_snps_freq")
+    freq =fread("//bfile_directory_path//g1000_nonFin_eur_imp_chr_1_22_posid_common_snps_freq.afreq")
+    ref1KG =freq[,.(CHROM =get("#CHROM"),POS,ID,REF,ALT,AF =ALT1_FREQ)]
+    save(ref1KG,file ="/bfile_directory_path//ref1KG_404_nonfin_EUR_imp_common_snps_AF.RData")
     # pre-calculating SNP-SNP cor matrix for genes based on ref panles 1000G and ukBB
     parallel::detectCores()
     getDTthreads()
@@ -59,10 +59,10 @@
 
 
 
-    bedFile1<- paste0("/faststorage/project/dsmwpred/takiy/DATA/1000g_eur/g1000_nonFin_eur_imp_chr_1_22_posid_common_snps.bed")
-    bim1 =fread("/faststorage/project/dsmwpred/takiy/DATA/1000g_eur/g1000_nonFin_eur_imp_chr_1_22_posid_common_snps.bim")
-    path1 =paste0("/faststorage/project/dsmwpred/takiy/DATA/snp_snp_cor_genes/1kg_nonfin_eur_imp_common_snps/") 
-    gene_refFlat =fread("/faststorage/project/dsmwpred/takiy/DATA/NCBI37.3/NCBI37.3.gene_v2.loc")
+    bedFile1<- paste0("/bfile_directory_path//g1000_nonFin_eur_imp_chr_1_22_posid_common_snps.bed")
+    bim1 =fread("/bfile_directory_path//g1000_nonFin_eur_imp_chr_1_22_posid_common_snps.bim")
+    path1 =paste0("/directory_path/snp_snp_cor_genes/1kg_nonfin_eur_imp_common_snps/") 
+    gene_refFlat =fread("/annotation_file_directory_path/NCBI37.3.gene_v2.loc")
     setnames(gene_refFlat,c("V1","V2","V3","V4","V5"),c("GENE","CHROM","START","STOP","STRAND"))
     gene_refFlat[,index:=1:(.N)]
     library(BEDMatrix)
