@@ -1,4 +1,7 @@
-# annotationt file (download from )
+# annotationt file
 ################################################################################################################################################################################################
-
+for LDAK-GBAT analysis use the following file "NCBI37.3.hg19_ldak_gene_v2.loc" from data folder
+for MAGMA analysis use the following file "NCBI37.3.gene_v2.loc" from data folder
+for GCTA-fastBAT analysis use the following file "NCBI37.3_hg19_gene.fastbat_vegas2_v2.glist" from data folder
+for sumFREGAT analysis use the following file "NCBI37.3_hg19_gene_sumfregat_imp_common_snps.refFlat" from data folder
 ################################################################################################################################################################################################
