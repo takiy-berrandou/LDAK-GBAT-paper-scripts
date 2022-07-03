@@ -1,21 +1,27 @@
 # GCTA-fastBAT
 ################################################################################################################################################################################################
-    #!/bin/bash
-    #SBATCH --account snpher
-    #SBATCH --mem-per-cpu 24G
-    #SBATCH -c 1
-    #SBATCH -t 0-03:00:00
-    #SBATCH --constraint "s04|s05"
-    # creating variables
-    result_directory=/faststorage/project/dsmwpred/takiy/analysis10_paper_results_item/4_results/
-    result_folder=$result_directory/gene_based_sumstats_10kukbbref_data/FASTBAT/
-    result_out=ukbb_height_50k_sumstats_imp_10kukbbref_fastbat_genebased
-    mkdir -p $result_folder
-    cd $result_folder
+#!/bin/bash
+#SBATCH --account snpher
+#SBATCH --mem-per-cpu 8G
+#SBATCH -c 1
+#SBATCH -t 0-03:00:00
+#SBATCH --constraint "s04|s05"
 
-    bfile_input=/faststorage/project/dsmwpred/takiy/DATA/UKBB/imputed_data/ukbb_10k_imp_refpanel3_chr_1_22_posid_common_snps
-    summary=/faststorage/project/dsmwpred/takiy/analysis6_ukbb_association_imputed_data/4_results/plink2_glm_50k/height_50k.train/height_ukbb_train_imp_50k_magma_fastbat_sumstat_posid.tab
-    annot_file=/faststorage/project/dsmwpred/takiy/DATA/NCBI37.3/NCBI37.3_hg19_gene.fastbat_vegas2_v2.glist
-    extract_file=/faststorage/project/dsmwpred/takiy/DATA/list_snps_posid_to_analyse_common_ukbb_imp_and_refpanels.txt
-    gcta_1.93_2beta  --bfile $bfile_input --fastBAT $summary --fastBAT-gene-list $annot_file --fastBAT-wind 0  --fastBAT-ld-cutoff 1 --fastBAT-write-snpset --out $result_out 
+result_directory=/result_directory_path/results/
+result_folder=$result_directory/gene_based_sumstats_404nonfineur1kgref_data/FASTBAT/
+result_out=ukbb_height_50k_sumstats_imp_404nonfineur1kgref_fastbat_genebased
+
+mkdir -p $result_folder
+cd $result_folder
+date
+
+bfile_input=/bfile_directory_path/g1000_nonFin_eur_imp_chr_1_22_posid_common_snps
+
+summary=/summary_statistics_directory_path/height_50k.train/height_ukbb_train_imp_50k_magma_fastbat_sumstat_posid.tab
+
+annot_file=/annotation_file_directory_path/NCBI37.3_hg19_gene.fastbat_vegas2_v2.glist
+
+gcta_1.93_2beta  --bfile $bfile_input --fastBAT $summary --fastBAT-gene-list $annot_file --fastBAT-wind 0  --fastBAT-ld-cutoff 1 --fastBAT-write-snpset --out $result_out 
+date
+
 ################################################################################################################################################################################################
