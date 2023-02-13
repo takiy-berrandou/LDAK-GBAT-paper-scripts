@@ -34,6 +34,6 @@ extract_file=/list_snps_extract_directory_path/list_snps_posid_to_analyse_common
 
 ldak5.2.linux --cut-genes $result_out --bfile $bfile_input --extract $extract_file --genefile $annot_file --pvalues $pvalues_file
 ldak5.2.linux --calc-genes-reml $result_out --summary $summary --bfile $bfile_input --extract $extract_file --ignore-weights YES --allow-ambiguous YES --power $power_value --gene-prune $pruning_value --gene-permutations $permutations_value
-ldak5.2.linu --join-genes-reml $result_out
+ldak5.2.linux --join-genes-reml $result_out
 date
 ################################################################################################################################################################################################
