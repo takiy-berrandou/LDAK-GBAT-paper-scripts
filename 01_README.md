@@ -1,5 +1,5 @@
 # LDAK-GBAT-paper-scripts
-This repository contains scripts used for performing all analyses presented in the PRSice-2 paper (and extra). 
+This repository contains scripts used for performing analyses presented in the LDAK-GBAT paper. 
 
 
 # Note
